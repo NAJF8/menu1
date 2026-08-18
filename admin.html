@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | 101 COFFEE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --green: #465a45; --green-hover: #3d4f3c; --beige: #e5d5be; --dark-brown: #2d1e17; --bg-color: #fcfbf9; --text-main: #1a2219; --text-muted: #806f63; }
+        body { margin: 0; font-family: 'Cairo', sans-serif; background-color: var(--bg-color); display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background-color: var(--green); color: #fff; display: flex; flex-direction: column; padding: 25px 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.05); z-index: 10; overflow-y: auto; }
+        .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; justify-content: center; text-align: center; }
+        .brand img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; background: #fff; }
+        .brand-text h2 { margin: 0; font-size: 18px; color: var(--beige); font-weight: 900; letter-spacing: 1px; }
+        .brand-text span { font-size: 10px; letter-spacing: 2px; color: #fff; font-weight: 600; }
+        .menu { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .menu li { margin-bottom: 8px; }
+        .menu a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; text-decoration: none; color: #fff; font-weight: 700; font-size: 14px; border-radius: 10px; transition: 0.3s; cursor: pointer; }
+        .menu a.active { background-color: var(--beige); color: var(--dark-brown); }
+        .menu a:hover:not(.active) { background-color: rgba(255,255,255,0.1); }
+        .btn-view-site { background-color: var(--dark-brown); color: #fff; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; margin-top: 20px; transition: 0.3s; }
+        .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+        .admin-section { display: none; } .admin-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 35px; }
+        .header-title { text-align: right; } .header-title span { font-size: 11px; font-weight: 800; color: var(--green); letter-spacing: 2px; }
+        .header-title h1 { margin: 5px 0 0; font-size: 32px; font-weight: 900; color: var(--text-main); }
+        .version-badge { background-color: var(--beige); color: var(--dark-brown); padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #fff; border: 1px solid #f0e9e1; border-radius: 16px; padding: 25px 20px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
+        .stat-card h3 { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 700; }
+        .stat-card .num { font-size: 38px; font-weight: 900; color: var(--text-main); margin: 10px 0; display: block; }
+        .panel { background: #fff; border: 1px solid #f0e9e1; border-radius: 16px; padding: 30px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
+        .panel-header { margin-bottom: 25px; text-align: right; } .panel-header span { font-size: 10px; font-weight: 800; color: var(--green); letter-spacing: 2px; }
+        .panel-header h2 { margin: 5px 0 10px; font-size: 20px; font-weight: 900; } .panel-header p { margin: 0; font-size: 13px; color: var(--text-muted); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; margin: 0; } .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--green); } input:checked + .slider:before { transform: translateX(24px); }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; } .form-group { text-align: right; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #e2d9d1; border-radius: 10px; font-family: 'Cairo'; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+        .checkbox-group { display: flex; gap: 20px; margin-bottom: 20px; padding: 15px; background: #fcfbf9; border-radius: 10px; border: 1px solid #f0e9e1; }
+        .checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; cursor: pointer; } .checkbox-group input { width: 18px; height: 18px; accent-color: var(--green); }
+        .btn-submit { background-color: var(--green); color: #fff; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: 'Cairo'; transition: 0.2s; }
+        .btn-cancel { background-color: #f0e9e1; color: var(--text-main); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-right: 10px; display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; } th, td { text-align: right; padding: 12px 15px; border-bottom: 1px solid #f0e9e1; font-size: 14px; }
+        th { color: var(--text-muted); font-weight: 800; font-size: 12px; background: var(--bg-color); } td { font-weight: 600; color: var(--text-main); vertical-align: middle; }
+        .action-btns { display: flex; gap: 5px; align-items: center; } .btn-icon { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2d9d1; background: #fff; font-weight: bold; cursor: pointer; }
+        .btn-edit { background: #e8f5e9; color: #27ae60; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'Cairo'; font-weight: 700; }
+        .btn-delete { background: #fef0f0; color: #d93025; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'Cairo'; font-weight: 700; }
+        .badge { background: #f0f7f6; color: var(--green); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; display: inline-block; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <img src="logo.jpg" alt="Logo">
+            <div class="brand-text"><h2>COFFEE 101</h2><span>ADMIN PANEL</span></div>
+        </div>
+        <ul class="menu">
+            <li><a onclick="showSection('dashboard')" class="active" id="nav-dashboard">▦ الرئيسية والإحصائيات</a></li>
+            <li><a onclick="showSection('products')" id="nav-products">🏷️ إدارة المنتجات</a></li>
+            <li><a onclick="showSection('categories')" id="nav-categories">📂 إدارة الأقسام</a></li>
+            <li><a onclick="showSection('offers')" id="nav-offers">🎁 العروض والأكثر طلباً</a></li>
+            <li><a onclick="showSection('loyalty')" id="nav-loyalty">❤️ بطاقة الولاء والمكافآت</a></li>
+            <li><a onclick="showSection('settings')" id="nav-settings">⚙ الإعدادات العامة</a></li>
+        </ul>
+        <a href="index.html" class="btn-view-site">← مشاهدة الموقع</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <div class="version-badge">PRO VERSION 4.0</div>
+            <div class="header-title"><span>ADMIN DASHBOARD</span><h1>لوحة التحكم</h1></div>
+        </div>
+
+        <div id="dashboard" class="admin-section active">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>إجمالي المنتجات</h3><span class="num" id="stat-products">0</span></div>
+                <div class="stat-card"><h3>الأقسام الفعالة</h3><span class="num" id="stat-cats">0</span></div>
+                <div class="stat-card"><h3>الأكثر طلباً</h3><span class="num" id="stat-popular">0</span></div>
+                <div class="stat-card"><h3>العروض</h3><span class="num" id="stat-offers">0</span></div>
+            </div>
+            <div class="panel flex-between">
+                <label class="switch"><input type="checkbox" id="ordersToggle"><span class="slider"></span></label>
+                <div class="panel-header" style="margin-bottom: 0;"><span>QUICK STATUS</span><h2 style="margin-bottom: 5px;">استقبال الطلبات</h2><p>إيقاف/تشغيل استقبال الطلبات عبر واتساب.</p></div>
+            </div>
+        </div>
+
+        <div id="products" class="admin-section">
+            <div class="panel">
+                <div class="panel-header"><span>PRODUCTS</span><h2 id="productFormTitle">إضافة منتج جديد</h2></div>
+                <form id="productForm">
+                    <input type="hidden" id="prodId">
+                    <div class="form-grid">
+                        <div class="form-group"><label>اسم المنتج</label><input type="text" id="prodName" required></div>
+                        <div class="form-group"><label>السعر (د.ع)</label><input type="number" id="prodPrice" required></div>
+                        <div class="form-group"><label>القسم</label><select id="prodCategory" required></select></div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group"><label>وصف المنتج</label><input type="text" id="prodDesc"></div>
+                        <div class="form-group"><label>رابط الصورة</label><input type="text" id="prodImage"></div>
+                    </div>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="prodSoon"> ⏳ قريباً</label>
+                        <label><input type="checkbox" id="prodPop"> 🔥 الأكثر طلباً</label>
+                        <label><input type="checkbox" id="prodOffer"> 🎁 عرض/خصم</label>
+                    </div>
+                    <div style="text-align: right;"><button type="submit" class="btn-submit" id="btnSaveProd">حفظ المنتج</button><button type="button" class="btn-cancel" id="btnCancelEdit" onclick="resetProdForm()">إلغاء التعديل</button></div>
+                </form>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span>MENU LIST</span><h2>قائمة المنتجات</h2></div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>الصورة</th><th>الاسم</th><th>القسم</th><th>السعر</th><th>الخيارات</th><th>إجراء</th></tr></thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="categories" class="admin-section">
+            <div class="panel">
+                <div class="panel-header"><span>CATEGORIES</span><h2>إضافة قسم جديد</h2></div>
+                <form id="addCategoryForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group"><label>اسم القسم</label><input type="text" id="catName" required></div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn-submit" style="width: 100%;">+ إضافة القسم</button></div>
+                    </div>
+                </form>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span>LIST</span><h2>الأقسام الحالية</h2></div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>الترتيب</th><th>اسم القسم</th><th>تفعيل/إيقاف</th><th>إجراء</th></tr></thead>
+                        <tbody id="categoriesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="offers" class="admin-section">
+            <div class="panel flex-between" style="background:#fcfbf9;">
+                <label class="switch"><input type="checkbox" id="togglePopularSec"><span class="slider"></span></label>
+                <div class="panel-header" style="margin:0;"><h2>تفعيل قسم الأكثر طلباً للزبائن</h2></div>
+            </div>
+            <div class="panel flex-between" style="background:#fcfbf9;">
+                <label class="switch"><input type="checkbox" id="toggleOffersSec"><span class="slider"></span></label>
+                <div class="panel-header" style="margin:0;"><h2>تفعيل قسم العروض للزبائن</h2></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span>MANAGE</span><h2>المنتجات (أكثر طلباً / عروض / قريباً)</h2></div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>اسم المنتج</th><th>قريباً ⏳</th><th>أكثر طلباً 🔥</th><th>عروض 🎁</th></tr></thead>
+                        <tbody id="quickTogglesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="loyalty" class="admin-section">
+            <div class="panel flex-between" style="background:#fcfbf9;">
+                <label class="switch"><input type="checkbox" id="toggleLoyaltySec"><span class="slider"></span></label>
+                <div class="panel-header" style="margin:0;"><h2>تفعيل ميزة "بطاقتك" (القلوب) للزبائن</h2></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span>REWARDS</span><h2>إضافة مكافأة جديدة (مشروب مجاني)</h2></div>
+                <form id="addRewardForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 150px;">
+                        <!-- تم التعديل لتكون قائمة منسدلة تسحب منتجات المنيو -->
+                        <div class="form-group"><label>المكافأة (اختر من المنيو)</label><select id="rewardName" required></select></div>
+                        <div class="form-group"><label>عدد القلوب المطلوبة</label><input type="number" id="rewardHearts" value="10" required></div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;"><button type="submit" class="btn-submit" style="width: 100%;">+ إضافة</button></div>
+                    </div>
+                </form>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span>REWARD LIST</span><h2>المكافآت الحالية</h2></div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>المكافأة</th><th>القلوب المطلوبة</th><th>إجراء</th></tr></thead>
+                        <tbody id="rewardsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings" class="admin-section">
+            <div class="panel">
+                <div class="panel-header"><span>GLOBAL SETTINGS</span><h2>الإعدادات العامة</h2></div>
+                <form id="globalSettingsForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label>اسم المحل (يظهر بالموقع)</label><input type="text" id="setShopName" required></div>
+                        <div class="form-group"><label>رقم واتساب المحل (للطلبات)</label><input type="text" id="setWhatsapp" required></div>
+                        <div class="form-group"><label>يوزر الانستغرام (بدون @)</label><input type="text" id="setInsta"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>عنوان المحل التفصيلي</label><input type="text" id="setAddress"></div>
+                        <!-- تم إضافة حقل رابط الخريطة -->
+                        <div class="form-group"><label>رابط الموقع على الخريطة (Google Maps)</label><input type="url" id="setMapUrl" placeholder="https://maps.app.goo.gl/..."></div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #e9ddd0; margin: 30px 0;">
+                    <div class="panel-header"><span>ROOM SETTINGS</span><h2>إعدادات غرفة الاجتماعات</h2></div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>سعر حجز الغرفة (د.ع)</label><input type="number" id="setRoomPrice"></div>
+                        <div class="form-group"><label>رقم واتساب مخصص للغرفة (اختياري)</label><input type="text" id="setRoomWhatsapp" placeholder="يستخدم العام إذا تُرك فارغاً"></div>
+                    </div>
+                    <div style="text-align: right;"><button type="submit" class="btn-submit">حفظ الإعدادات بالكامل</button></div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const load = (k, fallback) => { try { const v=localStorage.getItem("coffee101_"+k); return v?JSON.parse(v):fallback } catch(e){return fallback} };
+        const save = (k,v) => localStorage.setItem("coffee101_"+k,JSON.stringify(v));
+
+        let products = load("products", []);
+        let categoriesDB = load("categoriesDB", [{id:"c1", name: "قهوة ساخنة", active: true}, {id:"c2", name: "مشروبات باردة", active: true}]);
+        let ordersOpen = load("ordersOpen", true);
+        let rewardsDB = load("rewardsDB", []);
+        let settings = load("settings", { shopName: "101 COFFEE", whatsapp: "9647800000000", roomWhatsapp: "", instagram: "101coffee", mapUrl: "", address: "النجف الأشرف", roomPrice: 10000, enablePopular: true, enableOffers: true, enableLoyalty: true });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.menu a').forEach(link => link.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('nav-' + sectionId).classList.add('active');
+            refreshAdminData();
+        }
+
+        function refreshAdminData() {
+            if(document.getElementById('stat-products')) {
+                document.getElementById('stat-products').innerText = products.length;
+                document.getElementById('stat-cats').innerText = categoriesDB.filter(c=>c.active).length;
+                document.getElementById('stat-popular').innerText = products.filter(p=>p.popular).length;
+                document.getElementById('stat-offers').innerText = products.filter(p=>p.offer).length;
+            }
+
+            document.getElementById('ordersToggle').checked = ordersOpen;
+            document.getElementById('togglePopularSec').checked = settings.enablePopular;
+            document.getElementById('toggleOffersSec').checked = settings.enableOffers;
+            document.getElementById('toggleLoyaltySec').checked = settings.enableLoyalty;
+
+            document.getElementById('ordersToggle').onchange = (e) => { ordersOpen = e.target.checked; save("ordersOpen", ordersOpen); };
+            document.getElementById('togglePopularSec').onchange = (e) => { settings.enablePopular = e.target.checked; save("settings", settings); };
+            document.getElementById('toggleOffersSec').onchange = (e) => { settings.enableOffers = e.target.checked; save("settings", settings); };
+            document.getElementById('toggleLoyaltySec').onchange = (e) => { settings.enableLoyalty = e.target.checked; save("settings", settings); };
+
+            const catSelect = document.getElementById('prodCategory');
+            if(catSelect) catSelect.innerHTML = categoriesDB.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            // سحب المنتجات لداخل قائمة المكافآت المنسدلة
+            const rewardSelect = document.getElementById('rewardName');
+            if (rewardSelect) {
+                rewardSelect.innerHTML = products.length > 0 
+                    ? products.map(p => `<option value="${p.name}">${p.name}</option>`).join('')
+                    : `<option value="" disabled selected>لا توجد منتجات، أضف منتج أولاً</option>`;
+            }
+
+            document.getElementById('categoriesTable').innerHTML = categoriesDB.map((c, i) => `<tr><td class="action-btns"><button class="btn-icon" onclick="moveCat(${i},-1)" ${i===0?'disabled':''}>↑</button><button class="btn-icon" onclick="moveCat(${i},1)" ${i===categoriesDB.length-1?'disabled':''}>↓</button></td><td>${c.name}</td><td><label class="switch"><input type="checkbox" ${c.active?'checked':''} onchange="toggleCatActive(${i})"><span class="slider"></span></label></td><td><button class="btn-delete" onclick="deleteCat('${c.id}')">حذف</button></td></tr>`).join('');
+            document.getElementById('productsTableBody').innerHTML = products.map((p, i) => `<tr><td>${p.image?`<img src="${p.image}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">`:'☕'}</td><td>${p.name}</td><td><span class="badge">${p.category}</span></td><td>${p.price}</td><td>${p.comingSoon?'<span class="badge" style="background:#fff3e0;color:#e65100;">قريباً</span>':''}${p.popular?'<span class="badge" style="background:#ffebee;color:#c62828;">شائع</span>':''}${p.offer?'<span class="badge" style="background:#e8f5e9;color:#27ae60;">عرض</span>':''}</td><td class="action-btns"><button class="btn-edit" onclick="editProd(${p.id})">تعديل</button><button class="btn-delete" onclick="deleteProd(${p.id})">حذف</button></td></tr>`).join('');
+            document.getElementById('quickTogglesTable').innerHTML = products.map((p, i) => `<tr><td>${p.name} <br><small style="color:gray">${p.category}</small></td><td><label class="switch"><input type="checkbox" ${p.comingSoon?'checked':''} onchange="toggleProdProp(${i},'comingSoon')"><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" ${p.popular?'checked':''} onchange="toggleProdProp(${i},'popular')"><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" ${p.offer?'checked':''} onchange="toggleProdProp(${i},'offer')"><span class="slider"></span></label></td></tr>`).join('');
+            document.getElementById('rewardsTable').innerHTML = rewardsDB.map((r, i) => `<tr><td>${r.name}</td><td>${r.hearts}</td><td><button class="btn-delete" onclick="deleteReward(${r.id})">حذف</button></td></tr>`).join('');
+
+            document.getElementById('setShopName').value = settings.shopName || "";
+            document.getElementById('setWhatsapp').value = settings.whatsapp || "";
+            document.getElementById('setInsta').value = settings.instagram || "";
+            document.getElementById('setMapUrl').value = settings.mapUrl || "";
+            document.getElementById('setAddress').value = settings.address || "";
+            document.getElementById('setRoomPrice').value = settings.roomPrice || "";
+            document.getElementById('setRoomWhatsapp').value = settings.roomWhatsapp || "";
+        }
+
+        document.getElementById('addCategoryForm')?.addEventListener('submit', (e) => { e.preventDefault(); categoriesDB.push({ id: 'cat_'+Date.now(), name: document.getElementById('catName').value, active: true }); save("categoriesDB", categoriesDB); e.target.reset(); refreshAdminData(); });
+        window.deleteCat = function(id) { if(confirm("حذف القسم؟")) { categoriesDB = categoriesDB.filter(c => c.id !== id); save("categoriesDB", categoriesDB); refreshAdminData(); } };
+        window.toggleCatActive = function(index) { categoriesDB[index].active = !categoriesDB[index].active; save("categoriesDB", categoriesDB); refreshAdminData(); };
+        window.moveCat = function(i, d) { const temp=categoriesDB[i]; categoriesDB[i]=categoriesDB[i+d]; categoriesDB[i+d]=temp; save("categoriesDB", categoriesDB); refreshAdminData(); };
+
+        document.getElementById('productForm')?.addEventListener('submit', (e) => {
+            e.preventDefault(); const idToEdit = document.getElementById('prodId').value;
+            const data = { name: document.getElementById('prodName').value, price: Number(document.getElementById('prodPrice').value), category: document.getElementById('prodCategory').value, description: document.getElementById('prodDesc').value, image: document.getElementById('prodImage').value, comingSoon: document.getElementById('prodSoon').checked, popular: document.getElementById('prodPop').checked, offer: document.getElementById('prodOffer').checked };
+            if(idToEdit) { const idx = products.findIndex(p => p.id == idToEdit); if(idx>-1) products[idx] = {...products[idx], ...data}; } 
+            else { data.id = Date.now(); products.push(data); }
+            save("products", products); resetProdForm(); refreshAdminData(); alert("تم الحفظ بنجاح!");
+        });
+        window.editProd = function(id) {
+            const p = products.find(x => x.id == id); if(!p) return;
+            document.getElementById('prodId').value = p.id; document.getElementById('prodName').value = p.name; document.getElementById('prodPrice').value = p.price; document.getElementById('prodCategory').value = p.category; document.getElementById('prodDesc').value = p.description||""; document.getElementById('prodImage').value = p.image||""; document.getElementById('prodSoon').checked = !!p.comingSoon; document.getElementById('prodPop').checked = !!p.popular; document.getElementById('prodOffer').checked = !!p.offer;
+            document.getElementById('productFormTitle').innerText = "تعديل المنتج"; document.getElementById('btnSaveProd').innerText = "حفظ التعديلات"; document.getElementById('btnCancelEdit').style.display = "inline-block"; document.querySelector('.main-content').scrollTo({top:0});
+        };
+        window.resetProdForm = function() { document.getElementById('productForm').reset(); document.getElementById('prodId').value = ""; document.getElementById('productFormTitle').innerText = "إضافة منتج"; document.getElementById('btnSaveProd').innerText = "حفظ"; document.getElementById('btnCancelEdit').style.display = "none"; };
+        window.deleteProd = function(id) { if(confirm("حذف المنتج؟")) { products = products.filter(p => p.id !== id); save("products", products); refreshAdminData(); } };
+        window.toggleProdProp = function(i, prop) { products[i][prop] = !products[i][prop]; save("products", products); refreshAdminData(); };
+
+        document.getElementById('addRewardForm')?.addEventListener('submit', (e) => { e.preventDefault(); rewardsDB.push({ id: Date.now(), name: document.getElementById('rewardName').value, hearts: Number(document.getElementById('rewardHearts').value) }); save("rewardsDB", rewardsDB); e.target.reset(); refreshAdminData(); });
+        window.deleteReward = function(id) { if(confirm("حذف المكافأة؟")) { rewardsDB = rewardsDB.filter(r => r.id !== id); save("rewardsDB", rewardsDB); refreshAdminData(); } };
+
+        document.getElementById('globalSettingsForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            settings.shopName = document.getElementById('setShopName').value;
+            settings.whatsapp = document.getElementById('setWhatsapp').value;
+            settings.instagram = document.getElementById('setInsta').value;
+            settings.mapUrl = document.getElementById('setMapUrl').value;
+            settings.address = document.getElementById('setAddress').value;
+            settings.roomPrice = document.getElementById('setRoomPrice').value;
+            settings.roomWhatsapp = document.getElementById('setRoomWhatsapp').value;
+            save("settings", settings);
+            alert("تم حفظ الإعدادات بنجاح. ستنعكس فوراً على موقع الزبون!");
+        });
+
+        document.addEventListener("DOMContentLoaded", refreshAdminData);
+    </script>
+</body>
+</html>
