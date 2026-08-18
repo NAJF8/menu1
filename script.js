@@ -2,19 +2,27 @@
 const load = (k, fallback) => { try { const v=localStorage.getItem("coffee101_"+k); return v?JSON.parse(v):fallback } catch(e){return fallback} };
 const save = (k,v) => localStorage.setItem("coffee101_"+k,JSON.stringify(v));
 
-// منتجات افتراضية تظهر أول ما يفتح الموقع
+// منتجات افتراضية متنوعة لتشغيل جميع الأقسام
 const defaultProducts = [
     { id: 1, name: "اسبريسو", price: 3500, category: "قهوة ساخنة", description: "قهوة مركزة وغنية", image: "https://images.unsplash.com/photo-1510115565531-df2400b1a03e?w=500&q=80", popular: true },
-    { id: 2, name: "ايس لاتيه", price: 4500, category: "مشروبات باردة", description: "حليب بارد مع قهوة وثلج", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&q=80", offer: true },
+    { id: 2, name: "ايس لاتيه", price: 4500, category: "مشروبات باردة", description: "حليب بارد مع قهوة وثلج", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&q=80", offer: true, oldPrice: 5500, discount: true },
     { id: 3, name: "كابتشينو", price: 4000, category: "قهوة ساخنة", description: "رغوة غنية مع قهوة", image: "https://images.unsplash.com/photo-1534687941688-1b22e1189c47?w=500&q=80" },
-    { id: 4, name: "موهيتو فراولة", price: 3000, category: "مشروبات باردة", description: "منعش ولذيذ", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80", popular: true }
+    { id: 4, name: "موهيتو فراولة", price: 3000, category: "مشروبات باردة", description: "منعش ولذيذ", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80", popular: true },
+    { id: 5, name: "ماتشا لاتيه", price: 5000, category: "مشروبات باردة", description: "ماتشا ياباني فاخر", image: "https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?w=500&q=80", comingSoon: true },
+    { id: 6, name: "كيكة العسل", price: 4500, category: "حلويات", description: "كيكة روسية طبقات", image: "https://images.unsplash.com/photo-1571115177098-24c42de1bd15?w=500&q=80", popular: true }
 ];
 
 let products = load("products", defaultProducts);
-let categoriesDB = load("categoriesDB", [{id:"c1", name: "قهوة ساخنة", active: true}, {id:"c2", name: "مشروبات باردة", active: true}]);
+let categoriesDB = load("categoriesDB", [{id:"c1", name: "قهوة ساخنة", active: true}, {id:"c2", name: "مشروبات باردة", active: true}, {id:"c3", name: "حلويات", active: true}]);
 let ordersOpen = load("ordersOpen", true);
 let bookings = load("bookings", []); 
-let rewardsDB = load("rewardsDB", []);
+
+// تمت إضافة مكافآت افتراضية هنا ليتم عرضها عند الوصول لـ 10 قلوب
+const defaultRewards = [
+    { id: "r1", name: "قهوة مجانية ☕", hearts: 10 },
+    { id: "r2", name: "حلوى مجانية 🍰", hearts: 15 }
+];
+let rewardsDB = load("rewardsDB", defaultRewards);
 
 let defaultSettings = { 
     shopName: "101 COFFEE", whatsapp: "9647800000000", roomWhatsapp: "", instagram: "101coffee", mapUrl: "", address: "النجف الأشرف", 
@@ -121,7 +129,7 @@ function renderLoyaltyCard() {
     if(!settings.enableLoyalty) { container.style.display = 'none'; return; }
     container.style.display = 'block';
 
-    const maxHearts = 10;
+    const maxHearts = 10; // الهدف الأساسي
     let heartsHtml = '';
     for(let i=1; i<=maxHearts; i++) {
         heartsHtml += `<span class="heart ${i <= currentHearts ? 'filled' : ''}">❤</span>`;
@@ -138,23 +146,33 @@ function renderLoyaltyCard() {
     } else if(currentHearts < maxHearts) {
         msg.textContent = `باقي لك ${maxHearts - currentHearts} قلوب وتستلم مكافأة!`;
     } else {
-        msg.textContent = "مبروك! 🎉 اختر مكافأتك من القائمة:";
+        msg.textContent = "مبروك! 🎉 اختر مكافأتك من القائمة عبر الضغط عليها:";
     }
 
+    // عرض المكافآت التي يمتلك المستخدم قلوباً كافية لها
     let available = rewardsDB.filter(r => currentHearts >= r.hearts);
     if(available.length > 0) {
         rewardsDiv.innerHTML = available.map(r => `
-            <div class="reward-item">
-                <span>🎁 ${r.name}</span>
-                <span style="color:var(--teal);">يخصم ${r.hearts} قلوب</span>
+            <div class="reward-item" onclick="redeemReward(${r.hearts}, '${esc(r.name)}')" style="cursor:pointer; padding: 12px; background: #f8f9fa; border: 2px solid var(--teal); border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;">
+                <span style="font-weight: bold;">🎁 ${esc(r.name)}</span>
+                <span style="color:var(--teal); font-size: 0.9em;">(يخصم ${r.hearts} قلوب)</span>
             </div>
         `).join('');
     }
 }
+
+// دالة جديدة لاستبدال المكافآت
+window.redeemReward = function(cost, name) {
+    if(confirm(`هل أنت متأكد من استبدال ${cost} قلوب للحصول على: ${name}؟`)) {
+        changeHearts(-cost);
+        alert(`تم اختيار المكافأة بنجاح: ${name} 🎉\nيرجى إخبار الموظف لإضافتها لطلبك.`);
+    }
+}
+
 window.changeHearts = function(val) {
     currentHearts += val;
     if(currentHearts < 0) currentHearts = 0;
-    if(currentHearts > 20) currentHearts = 20;
+    if(currentHearts > 20) currentHearts = 20; // الحد الأقصى
     save("userHearts", currentHearts);
     renderLoyaltyCard();
 }
