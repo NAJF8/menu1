@@ -2,8 +2,16 @@
 const load = (k, fallback) => { try { const v=localStorage.getItem("coffee101_"+k); return v?JSON.parse(v):fallback } catch(e){return fallback} };
 const save = (k,v) => localStorage.setItem("coffee101_"+k,JSON.stringify(v));
 
-let products = load("products", []);
-let categoriesDB = load("categoriesDB", []);
+// منتجات افتراضية تظهر أول ما يفتح الموقع
+const defaultProducts = [
+    { id: 1, name: "اسبريسو", price: 3500, category: "قهوة ساخنة", description: "قهوة مركزة وغنية", image: "https://images.unsplash.com/photo-1510115565531-df2400b1a03e?w=500&q=80", popular: true },
+    { id: 2, name: "ايس لاتيه", price: 4500, category: "مشروبات باردة", description: "حليب بارد مع قهوة وثلج", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&q=80", offer: true },
+    { id: 3, name: "كابتشينو", price: 4000, category: "قهوة ساخنة", description: "رغوة غنية مع قهوة", image: "https://images.unsplash.com/photo-1534687941688-1b22e1189c47?w=500&q=80" },
+    { id: 4, name: "موهيتو فراولة", price: 3000, category: "مشروبات باردة", description: "منعش ولذيذ", image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80", popular: true }
+];
+
+let products = load("products", defaultProducts);
+let categoriesDB = load("categoriesDB", [{id:"c1", name: "قهوة ساخنة", active: true}, {id:"c2", name: "مشروبات باردة", active: true}]);
 let ordersOpen = load("ordersOpen", true);
 let bookings = load("bookings", []); 
 let rewardsDB = load("rewardsDB", []);
@@ -14,7 +22,7 @@ let defaultSettings = {
 };
 let settings = load("settings", defaultSettings);
 let cart = load("cart", []);
-const deliveryAreas = [{name:"النجف المركز",price:2000}, {name:"منطقة ثانية",price:3000}];
+const deliveryAreas = [{name:"النجف المركز",price:2000}, {name:"الكوفة",price:3000}];
 
 const money = n => new Intl.NumberFormat("ar-IQ").format(n) + " د.ع";
 const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -126,7 +134,7 @@ function renderLoyaltyCard() {
     rewardsDiv.innerHTML = '';
 
     if(currentHearts === 0) {
-        msg.textContent = "اجمع 1-10 قلوب لتحصل على مكافأتك!";
+        msg.textContent = "اجمع 10 قلوب لتحصل على مكافأتك!";
     } else if(currentHearts < maxHearts) {
         msg.textContent = `باقي لك ${maxHearts - currentHearts} قلوب وتستلم مكافأة!`;
     } else {
