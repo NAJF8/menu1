@@ -6,9 +6,8 @@ setTimeout(() => {
         splash.style.opacity = "0";
         setTimeout(() => { splash.style.display = "none"; }, 500);
     }
-}, 2000); // الشاشة تختفي تلقائياً بعد ثانيتين
+}, 2000);
 
-// إخفاء احتياطي: إذا ضغط المستخدم على الشاشة تختفي الشاشة الخضراء فوراً
 window.addEventListener("click", () => {
     const splash = document.getElementById("splashScreen");
     if (splash && splash.style.display !== "none") {
@@ -17,12 +16,11 @@ window.addEventListener("click", () => {
 });
 // ==============================================
 
-
 // === 2. دوال الحفظ والاسترجاع ===
 const load = (k, fallback) => { try { const v=localStorage.getItem("coffee101_"+k); return v?JSON.parse(v):fallback } catch(e){return fallback} };
 const save = (k,v) => localStorage.setItem("coffee101_"+k,JSON.stringify(v));
 
-// === 3. منتجات افتراضية متنوعة لتشغيل جميع الأقسام ===
+// === 3. منتجات افتراضية ===
 const defaultProducts = [
     { id: 1, name: "اسبريسو", price: 3500, category: "قهوة ساخنة", description: "قهوة مركزة وغنية", image: "https://images.unsplash.com/photo-1510115565531-df2400b1a03e?w=500&q=80", popular: true },
     { id: 2, name: "ايس لاتيه", price: 4500, category: "مشروبات باردة", description: "حليب بارد مع قهوة وثلج", image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&q=80", offer: true, oldPrice: 5500, discount: true },
@@ -33,11 +31,15 @@ const defaultProducts = [
 ];
 
 let products = load("products", defaultProducts);
-let categoriesDB = load("categoriesDB", [{id:"c1", name: "قهوة ساخنة", active: true}, {id:"c2", name: "مشروبات باردة", active: true}, {id:"c3", name: "حلويات", active: true}]);
+let categoriesDB = load("categoriesDB", [
+    {id:"c1", name: "قهوة ساخنة", active: true}, 
+    {id:"c2", name: "مشروبات باردة", active: true}, 
+    {id:"c3", name: "حلويات", active: true}
+]);
 let ordersOpen = load("ordersOpen", true);
 let bookings = load("bookings", []); 
 
-// === 4. مكافآت افتراضية ليتم عرضها عند الوصول لـ 10 قلوب ===
+// === 4. إعدادات المتجر ===
 const defaultRewards = [
     { id: "r1", name: "قهوة مجانية ☕", hearts: 10 },
     { id: "r2", name: "حلوى مجانية 🍰", hearts: 15 }
@@ -52,7 +54,7 @@ let settings = load("settings", defaultSettings);
 let cart = load("cart", []);
 const deliveryAreas = [{name:"النجف المركز",price:2000}, {name:"الكوفة",price:3000}];
 
-// === 5. دوال مساعدة ===
+// === 5. دوال مساعدة وبناء الواجهة ===
 const money = n => new Intl.NumberFormat("ar-IQ").format(n) + " د.ع";
 const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const imgHTML = (p,cls="") => p.image ? `<img class="${cls}" src="${esc(p.image)}" alt="${esc(p.name)}" onerror="this.style.display='none';this.parentElement.classList.add('placeholder')">` : `<span class="placeholder">☕</span>`;
